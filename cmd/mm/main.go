@@ -9,19 +9,26 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/hir4ta/mumei-md/internal/config"
+	"github.com/hir4ta/mumei-md/internal/installer"
 	"github.com/hir4ta/mumei-md/internal/render"
 	"github.com/hir4ta/mumei-md/internal/tui"
 )
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "install" {
+		os.Exit(installer.Run(os.Args[2:]))
+	}
+
 	var (
-		theme     string
+		theme      string
 		listThemes bool
 	)
 	flag.StringVar(&theme, "theme", "", "color theme (overrides config); see -list-themes")
 	flag.BoolVar(&listThemes, "list-themes", false, "list available themes and exit")
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage: mm [--theme NAME] <markdown-file>\n\n")
+		fmt.Fprintf(os.Stderr, "usage:\n")
+		fmt.Fprintf(os.Stderr, "  mm [--theme NAME] <markdown-file>\n")
+		fmt.Fprintf(os.Stderr, "  mm install                    install/upgrade & wire up PATH\n\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()

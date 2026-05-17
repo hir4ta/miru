@@ -4,13 +4,22 @@ A rich-looking Markdown viewer you can open in your terminal.
 
 ## Install
 
-One-liner. No Go toolchain required — downloads a prebuilt static binary for your platform, drops it in `~/.local/bin`, and appends a PATH entry to your shell rc so `mm` works in any new shell:
+One-liner. No Go toolchain required:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hir4ta/mumei-md/main/install.sh | sh
 ```
 
+The shell bootstrap downloads a prebuilt static binary for your platform, then hands off to `mm install` — a Bubble Tea install UI that self-installs the binary, configures your shell rc PATH, and verifies the result.
+
 Supported platforms: macOS (Intel / Apple Silicon), Linux (x86_64 / arm64). Shell rc handled: zsh, bash, fish.
+
+You can also run the installer directly any time after the binary is on disk:
+
+```sh
+mm install                     # re-run with the rich UI
+mm install --no-modify-path    # only install the binary, skip PATH update
+```
 
 Environment overrides:
 
