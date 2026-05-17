@@ -8,26 +8,49 @@ A quiet file viewer for your terminal. Markdown gets a full glamour render with 
   <img src="https://github.com/user-attachments/assets/a7ad20b7-47cd-4f8f-a657-a0de22bee189" alt="miru rendering sample.py" width="32%">
 </p>
 
+## Features
+
+- **One viewer for two worlds.** Markdown through [glamour](https://github.com/charmbracelet/glamour), source and config files through [chroma](https://github.com/alecthomas/chroma). No more switching between `bat` and `glow`.
+- **Mermaid diagrams in the browser.** Press `b` to open the file as a styled HTML page with `mermaid.js` already wired up.
+- **Live theme switching.** Press `s` for an in-place theme picker — six themes, applied instantly and persisted to your config.
+- **Self-installing static binary.** No Go toolchain, no Python venv, no Node. The installer is itself a Bubble Tea app that copies the binary into place and configures your shell PATH.
+- **Heading jump** for markdown (`{` / `}`), line numbers for source files, vim-style scrolling everywhere.
+- **In-place updates** with `miru update` — no need to re-run `curl | sh`.
+
 ## Install
 
-One-liner. No Go toolchain required:
+### One-line bootstrap
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 ```
 
-The shell bootstrap downloads a prebuilt static binary for your platform, then hands off to `miru install` — a Bubble Tea install UI that self-installs the binary, configures your shell rc PATH, and verifies the result.
+The shell bootstrap downloads a prebuilt static binary for your platform, then hands off to `miru install` — a Bubble Tea installer that self-copies the binary, configures your shell rc PATH, and verifies the result. Supported on macOS (Intel / Apple Silicon) and Linux (x86_64 / arm64); shell rc handled for zsh, bash, fish.
 
-Supported platforms: macOS (Intel / Apple Silicon), Linux (x86_64 / arm64). Shell rc handled: zsh, bash, fish.
+### Go toolchain
 
-You can also run the installer directly any time after the binary is on disk:
+```sh
+go install github.com/hir4ta/miru/cmd/miru@latest
+```
+
+### Manual download
+
+Pick a tarball from the [releases page](https://github.com/hir4ta/miru/releases/latest), extract, and put `miru` on your PATH. Checksums and SBOM are attached to every release.
+
+### Update
+
+```sh
+miru update                      # replace this binary with the latest release
+```
+
+### Installer flags & environment
+
+After the binary is on disk you can re-run the installer any time:
 
 ```sh
 miru install                     # re-run with the rich UI
 miru install --no-modify-path    # only install the binary, skip PATH update
 ```
-
-Environment overrides:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -35,17 +58,9 @@ Environment overrides:
 | `INSTALL_DIR` | `$HOME/.local/bin` | binary destination |
 | `MIRU_NO_MODIFY_PATH` | `0` | set to `1` to skip the shell rc update |
 
-Example:
-
 ```sh
 VERSION=v0.1.0 INSTALL_DIR=/usr/local/bin MIRU_NO_MODIFY_PATH=1 \
   curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
-```
-
-If you have a Go toolchain, you can also build from source:
-
-```sh
-go install github.com/hir4ta/miru/cmd/miru@latest
 ```
 
 ## Usage
@@ -60,6 +75,15 @@ miru --list-themes
 ```
 
 Files with a `.md` / `.markdown` extension take the markdown path (glamour ANSI in the TUI, goldmark + github-markdown.css + mermaid.js in the browser). Everything else takes the chroma path with line numbers in the TUI and a styled HTML page in the browser.
+
+### Browser preview (`b`)
+
+Pressing `b` writes the file to a temporary HTML page and opens it with your default browser:
+
+- **Markdown** — goldmark with GFM extensions, [github-markdown.css](https://github.com/sindresorhus/github-markdown-css), and inlined [mermaid.js](https://mermaid.js.org/) from a CDN for ` ```mermaid ` blocks.
+- **Source files** — chroma with line numbers and a dark theme.
+
+The browser path follows the same conventions as common Markdown previewers (Obsidian, VS Code preview): raw HTML inside Markdown is rendered as-is and mermaid runs with `securityLevel: "loose"`. **Only browser-render files you trust.** The TUI view (default `miru <file>`) is pure ANSI text — no scripts, no remote fetches.
 
 ## Key bindings
 
