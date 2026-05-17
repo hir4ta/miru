@@ -121,6 +121,18 @@ for f in *.md; do
 done
 ```
 
+## Mermaid diagrams (browser only)
+
+In the terminal, mermaid blocks render as plain code. Press `b` to open in the browser, where the diagram is drawn by mermaid.js.
+
+```mermaid
+flowchart LR
+    A[Markdown] --> B(goldmark)
+    B --> C{Render target}
+    C -->|TUI| D[glamour + lipgloss]
+    C -->|Browser| E[HTML + mermaid.js]
+```
+
 ## Table
 
 | Feature | Status | Notes |

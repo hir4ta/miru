@@ -29,18 +29,32 @@ const htmlTemplate = `<!DOCTYPE html>
 <style>{{.CSS}}</style>
 <style>
 :root { color-scheme: dark light; }
-body {
+body.markdown-body {
   box-sizing: border-box;
   min-width: 200px;
   max-width: 980px;
   margin: 0 auto;
   padding: 45px;
 }
-@media (max-width: 767px) { body { padding: 15px; } }
+@media (max-width: 767px) { body.markdown-body { padding: 15px; } }
+.mermaid { display: flex; justify-content: center; margin: 1em 0; }
+.mermaid svg { max-width: 100%; height: auto; }
 </style>
 </head>
 <body class="markdown-body">
 {{.Body}}
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default", securityLevel: "loose" });
+document.querySelectorAll("pre > code.language-mermaid").forEach(code => {
+  const div = document.createElement("div");
+  div.className = "mermaid";
+  div.textContent = code.textContent;
+  code.parentElement.replaceWith(div);
+});
+mermaid.run();
+</script>
 </body>
 </html>`
 
