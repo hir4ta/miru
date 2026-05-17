@@ -117,7 +117,7 @@ func OpenInBrowser(filename, markdown string) error {
 		return err
 	}
 
-	f, err := os.CreateTemp("", "mumei-md-*.html")
+	f, err := os.CreateTemp("", "miru-*.html")
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ func TestToHTML(t *testing.T) {
 	for _, want := range []string{
 		"<!DOCTYPE html>",
 		`class="markdown-body"`,
-		"mumei-md sample",
+		"miru sample",
 		"<table>",
 		"<code",
 		"sample.md",
@@ -30,6 +30,6 @@ func TestToHTML(t *testing.T) {
 			t.Errorf("html missing %q", want)
 		}
 	}
-	_ = os.WriteFile("/tmp/mumei-md-test.html", out, 0644)
-	t.Logf("wrote /tmp/mumei-md-test.html (%d bytes)", len(out))
+	_ = os.WriteFile("/tmp/miru-test.html", out, 0644)
+	t.Logf("wrote /tmp/miru-test.html (%d bytes)", len(out))
 }

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hir4ta/mumei-md/internal/render"
+	"github.com/hir4ta/miru/internal/render"
 )
 
 func TestExtract(t *testing.T) {
@@ -16,7 +16,7 @@ func TestExtract(t *testing.T) {
 	if len(headings) < 10 {
 		t.Fatalf("expected many headings, got %d", len(headings))
 	}
-	if headings[0].Level != 1 || headings[0].Text != "mumei-md sample" {
+	if headings[0].Level != 1 || headings[0].Text != "miru sample" {
 		t.Errorf("first heading mismatch: %+v", headings[0])
 	}
 	for i, h := range headings {

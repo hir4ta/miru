@@ -8,10 +8,10 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/hir4ta/mumei-md/internal/config"
-	"github.com/hir4ta/mumei-md/internal/installer"
-	"github.com/hir4ta/mumei-md/internal/render"
-	"github.com/hir4ta/mumei-md/internal/tui"
+	"github.com/hir4ta/miru/internal/config"
+	"github.com/hir4ta/miru/internal/installer"
+	"github.com/hir4ta/miru/internal/render"
+	"github.com/hir4ta/miru/internal/tui"
 )
 
 func main() {
@@ -74,10 +74,10 @@ func main() {
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  mm [--theme NAME] <markdown-file>      view a markdown file in the TUI
-  mm install                             install/repair & wire up PATH
-  mm update                              replace this binary with the latest release
-  mm version                             print version
+  miru [--theme NAME] <markdown-file>      view a markdown file in the TUI
+  miru install                             install/repair & wire up PATH
+  miru update                              replace this binary with the latest release
+  miru version                             print version
 
 flags:
   --theme NAME                           color theme (see --list-themes)
@@ -87,12 +87,12 @@ flags:
 
 // resolveTheme picks the theme using precedence:
 //
-//	--theme flag > $MUMEI_THEME > config file > render.DefaultTheme
+//	--theme flag > $MIRU_THEME > config file > render.DefaultTheme
 func resolveTheme(flagValue string) string {
 	if strings.TrimSpace(flagValue) != "" {
 		return flagValue
 	}
-	if env := strings.TrimSpace(os.Getenv("MUMEI_THEME")); env != "" {
+	if env := strings.TrimSpace(os.Getenv("MIRU_THEME")); env != "" {
 		return env
 	}
 	if cfg, err := config.Load(); err == nil && strings.TrimSpace(cfg.Theme) != "" {

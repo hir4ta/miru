@@ -5,8 +5,8 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/hir4ta/mumei-md/internal/nav"
-	"github.com/hir4ta/mumei-md/internal/render"
+	"github.com/hir4ta/miru/internal/nav"
+	"github.com/hir4ta/miru/internal/render"
 )
 
 type Model struct {

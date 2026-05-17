@@ -1,6 +1,6 @@
-# mumei-md sample
+# miru sample
 
-This is a markdown file for trying out **mumei-md**. It covers the basic syntax.
+This is a markdown file for trying out **miru**. It covers the basic syntax.
 
 ## Headings
 
@@ -17,7 +17,7 @@ This is a markdown file for trying out **mumei-md**. It covers the basic syntax.
 Regular text. **Bold** and *italic* and ***bold italic*** and ~~strikethrough~~ all mix together.
 Inline code is wrapped in backticks like `const x = 42`.
 
-Short commands such as `mm sample.md` and paths like `internal/render/glamour.go` can also be written in `code` style.
+Short commands such as `miru sample.md` and paths like `internal/render/glamour.go` can also be written in `code` style.
 
 ## Unordered list (`-` / `*`)
 
@@ -92,7 +92,7 @@ import (
 
 func main() {
     if len(os.Args) < 2 {
-        fmt.Fprintln(os.Stderr, "usage: mm <file>")
+        fmt.Fprintln(os.Stderr, "usage: miru <file>")
         os.Exit(2)
     }
     fmt.Printf("hello, %s\n", os.Args[1])
@@ -117,7 +117,7 @@ Bash:
 #!/bin/bash
 set -euo pipefail
 for f in *.md; do
-  mm "$f"
+  miru "$f"
 done
 ```
 

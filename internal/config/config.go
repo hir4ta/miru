@@ -12,17 +12,17 @@ type Config struct {
 }
 
 // Path returns the resolved config file location:
-//   $XDG_CONFIG_HOME/mumei-md/config.json
-//   or $HOME/.config/mumei-md/config.json (fallback)
+//   $XDG_CONFIG_HOME/miru/config.json
+//   or $HOME/.config/miru/config.json (fallback)
 func Path() (string, error) {
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		return filepath.Join(xdg, "mumei-md", "config.json"), nil
+		return filepath.Join(xdg, "miru", "config.json"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".config", "mumei-md", "config.json"), nil
+	return filepath.Join(home, ".config", "miru", "config.json"), nil
 }
 
 // Save writes the config file, creating parent directories as needed.

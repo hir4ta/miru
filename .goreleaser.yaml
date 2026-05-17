@@ -1,14 +1,14 @@
 version: 2
-project_name: mumei-md
+project_name: miru
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: mm
-    main: ./cmd/mm
-    binary: mm
+  - id: miru
+    main: ./cmd/miru
+    binary: miru
     env:
       - CGO_ENABLED=0
     goos:
@@ -19,14 +19,18 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/hir4ta/mumei-md/internal/installer.Version={{ .Version }}
+      - -X github.com/hir4ta/miru/internal/installer.Version={{ .Version }}
 
 archives:
   - id: default
-    name_template: "mm_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "miru_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - README.md
       - sample.md
+      - sample.js
+      - sample.py
+      - sample.go
+      - sample.json
       - LICENSE*
 
 checksum:
@@ -38,7 +42,7 @@ sboms:
 release:
   github:
     owner: hir4ta
-    name: mumei-md
+    name: miru
   draft: false
   prerelease: auto
 

@@ -12,7 +12,7 @@ import (
 
 var errCouldNotDetectShell = errors.New("could not detect shell rc file")
 
-// installBinary copies the running executable to cfg.InstallDir/mm.
+// installBinary copies the running executable to cfg.InstallDir/miru.
 // If the running binary already lives at the destination, it's a no-op.
 func installBinary(cfg Config) (string, error) {
 	src, err := os.Executable()
@@ -26,7 +26,7 @@ func installBinary(cfg Config) (string, error) {
 	if err := os.MkdirAll(cfg.InstallDir, 0o755); err != nil {
 		return "", fmt.Errorf("mkdir %s: %w", cfg.InstallDir, err)
 	}
-	dst := filepath.Join(cfg.InstallDir, "mm")
+	dst := filepath.Join(cfg.InstallDir, "miru")
 	dstAbs, _ := filepath.Abs(dst)
 	if srcAbs == dstAbs {
 		return dst, nil
@@ -146,12 +146,12 @@ func appendRC(rc, line string) error {
 		return err
 	}
 	defer f.Close()
-	_, err = fmt.Fprintf(f, "\n# added by mumei-md installer\n%s\n", line)
+	_, err = fmt.Fprintf(f, "\n# added by miru installer\n%s\n", line)
 	return err
 }
 
 func verifyInstall(cfg Config) error {
-	dst := filepath.Join(cfg.InstallDir, "mm")
+	dst := filepath.Join(cfg.InstallDir, "miru")
 	st, err := os.Stat(dst)
 	if err != nil {
 		return err

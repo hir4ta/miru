@@ -20,12 +20,12 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
-	"github.com/hir4ta/mumei-md/internal/render"
+	"github.com/hir4ta/miru/internal/render"
 )
 
-const repo = "hir4ta/mumei-md"
+const repo = "hir4ta/miru"
 
-// UpdateRun executes the `mm update` subcommand. Returns a process exit code.
+// UpdateRun executes the `miru update` subcommand. Returns a process exit code.
 func UpdateRun(args []string) int {
 	cfg := defaultConfig()
 
@@ -60,13 +60,13 @@ func UpdateRun(args []string) int {
 }
 
 func printUpdateHelp() {
-	fmt.Println("usage: mm update [--install-dir DIR] [--theme NAME]")
+	fmt.Println("usage: miru update [--install-dir DIR] [--theme NAME]")
 	fmt.Println()
-	fmt.Println("Replaces the installed mm binary with the latest GitHub release.")
+	fmt.Println("Replaces the installed miru binary with the latest GitHub release.")
 	fmt.Println()
 	fmt.Println("environment overrides:")
 	fmt.Println("  INSTALL_DIR    target install directory (default: $HOME/.local/bin)")
-	fmt.Println("  MUMEI_THEME    color theme for update UI")
+	fmt.Println("  MIRU_THEME    color theme for update UI")
 }
 
 type updateModel struct {
@@ -156,7 +156,7 @@ func runUpdateStep(m updateModel, i int) tea.Cmd {
 			}
 			return updateStepResult{index: i, status: stepDone, detail: filepath.Base(tarball), tarball: tarball}
 		case 2:
-			dst := filepath.Join(m.cfg.InstallDir, "mm")
+			dst := filepath.Join(m.cfg.InstallDir, "miru")
 			if err := replaceBinary(m.tarballPath, dst); err != nil {
 				return updateStepResult{index: i, err: err}
 			}
@@ -243,7 +243,7 @@ func (m updateModel) View() tea.View {
 	bold := lipgloss.NewStyle().Bold(true).Foreground(m.accent)
 	bad := lipgloss.NewStyle().Foreground(m.bad)
 
-	title := bold.Render("mumei-md update")
+	title := bold.Render("miru update")
 	var subtitle string
 	if m.latestVersion != "" {
 		subtitle = muted.Render(fmt.Sprintf("%s → %s · %s/%s",
@@ -339,10 +339,10 @@ func resolveLatestVersion(repo string) (string, error) {
 // temp file and returns its path.
 func downloadLatest(version string) (string, error) {
 	versionNoV := strings.TrimPrefix(version, "v")
-	asset := fmt.Sprintf("mm_%s_%s_%s.tar.gz", versionNoV, runtime.GOOS, runtime.GOARCH)
+	asset := fmt.Sprintf("miru_%s_%s_%s.tar.gz", versionNoV, runtime.GOOS, runtime.GOARCH)
 	url := fmt.Sprintf("https://github.com/%s/releases/download/%s/%s", repo, version, asset)
 
-	tmp, err := os.CreateTemp("", "mm-update-*.tar.gz")
+	tmp, err := os.CreateTemp("", "miru-update-*.tar.gz")
 	if err != nil {
 		return "", err
 	}
@@ -363,7 +363,7 @@ func downloadLatest(version string) (string, error) {
 	return tmp.Name(), nil
 }
 
-// replaceBinary extracts the mm binary from tarball and atomically renames
+// replaceBinary extracts the miru binary from tarball and atomically renames
 // it onto dstBinary. Atomic rename onto a running executable is permitted
 // on macOS and Linux.
 func replaceBinary(tarball, dstBinary string) error {
@@ -390,7 +390,7 @@ func replaceBinary(tarball, dstBinary string) error {
 		if err != nil {
 			return fmt.Errorf("tar: %w", err)
 		}
-		if h.Typeflag != tar.TypeReg || filepath.Base(h.Name) != "mm" {
+		if h.Typeflag != tar.TypeReg || filepath.Base(h.Name) != "miru" {
 			continue
 		}
 		if _, err := io.Copy(&binData, tr); err != nil {
@@ -400,7 +400,7 @@ func replaceBinary(tarball, dstBinary string) error {
 		break
 	}
 	if !found {
-		return errors.New("mm binary not found in tarball")
+		return errors.New("miru binary not found in tarball")
 	}
 
 	if err := os.MkdirAll(filepath.Dir(dstBinary), 0o755); err != nil {

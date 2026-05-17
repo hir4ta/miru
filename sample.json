@@ -1,0 +1,41 @@
+{
+  "$schema": "https://example.com/miru-sample.schema.json",
+  "name": "miru",
+  "version": "0.4.0",
+  "description": "A rich-looking file viewer for your terminal.",
+  "license": "MIT",
+  "private": false,
+  "keywords": ["markdown", "tui", "viewer", "bubble-tea", "syntax-highlight"],
+  "author": {
+    "name": "hir4ta",
+    "url": "https://github.com/hir4ta"
+  },
+  "platforms": {
+    "darwin": ["amd64", "arm64"],
+    "linux": ["amd64", "arm64"]
+  },
+  "config": {
+    "theme": "claude",
+    "wrap": true,
+    "tabWidth": 2,
+    "showLineNumbers": null
+  },
+  "themes": [
+    { "name": "claude",       "default": true,  "accent": "#d67c5b" },
+    { "name": "gruvbox",      "default": false, "accent": "#fabd2f" },
+    { "name": "nord",         "default": false, "accent": "#88c0d0" },
+    { "name": "everforest",   "default": false, "accent": "#a7c080" }
+  ],
+  "dependencies": {
+    "charm.land/bubbletea": "^2.0.6",
+    "charm.land/bubbles":   "^2.1.0",
+    "charm.land/lipgloss":  "^2.0.3",
+    "charm.land/glamour":   "^2.0.0"
+  },
+  "stats": {
+    "files": 30,
+    "lines": 2400,
+    "stars": 0,
+    "downloads": null
+  }
+}

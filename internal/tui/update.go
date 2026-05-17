@@ -6,9 +6,9 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
-	"github.com/hir4ta/mumei-md/internal/config"
-	"github.com/hir4ta/mumei-md/internal/nav"
-	"github.com/hir4ta/mumei-md/internal/render"
+	"github.com/hir4ta/miru/internal/config"
+	"github.com/hir4ta/miru/internal/nav"
+	"github.com/hir4ta/miru/internal/render"
 )
 
 func (m *Model) layout() {

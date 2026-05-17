@@ -1,22 +1,22 @@
 #!/bin/sh
-# install.sh: bootstrap the mumei-md installer.
+# install.sh: bootstrap the miru installer.
 #
-# Downloads a prebuilt `mm` binary and hands off to its `install`
+# Downloads a prebuilt `miru` binary and hands off to its `install`
 # subcommand, which presents a rich Bubble Tea install UI and performs
 # self-installation + PATH configuration.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/hir4ta/mumei-md/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 #
-# Environment overrides (passed through to `mm install`):
+# Environment overrides (passed through to `miru install`):
 #   VERSION                pin a release tag, e.g. v0.1.0 (default: latest)
 #   INSTALL_DIR            target install directory (default: $HOME/.local/bin)
-#   MUMEI_NO_MODIFY_PATH   set to 1 to skip shell rc PATH update
-#   MUMEI_THEME            color theme for the installer UI
+#   MIRU_NO_MODIFY_PATH   set to 1 to skip shell rc PATH update
+#   MIRU_THEME            color theme for the installer UI
 
 set -eu
 
-REPO="hir4ta/mumei-md"
+REPO="hir4ta/miru"
 VERSION="${VERSION:-}"
 
 err() { printf 'install: %s\n' "$*" >&2; exit 1; }
@@ -46,7 +46,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 version_no_v="${VERSION#v}"
-asset="mm_${version_no_v}_${OS}_${ARCH}.tar.gz"
+asset="miru_${version_no_v}_${OS}_${ARCH}.tar.gz"
 url="https://github.com/${REPO}/releases/download/${VERSION}/${asset}"
 
 tmp=$(mktemp -d)
@@ -56,8 +56,8 @@ curl -fsSL --proto '=https' --tlsv1.2 "$url" -o "$tmp/$asset" \
 	|| err "download failed: $url"
 
 tar -xzf "$tmp/$asset" -C "$tmp"
-[ -f "$tmp/mm" ] || err "archive did not contain expected binary"
-chmod +x "$tmp/mm"
+[ -f "$tmp/miru" ] || err "archive did not contain expected binary"
+chmod +x "$tmp/miru"
 
 # Hand off to the rich Bubble Tea installer.
-"$tmp/mm" install
+"$tmp/miru" install

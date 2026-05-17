@@ -1,4 +1,4 @@
-// Package installer implements the `mm install` subcommand: a Bubble Tea
+// Package installer implements the `miru install` subcommand: a Bubble Tea
 // driven, rich-UI installer that self-copies the running binary into
 // INSTALL_DIR and (optionally) wires the user's shell rc PATH.
 package installer
@@ -19,7 +19,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
-	"github.com/hir4ta/mumei-md/internal/render"
+	"github.com/hir4ta/miru/internal/render"
 )
 
 // Version is injected at build time via -ldflags by GoReleaser. Falls back
@@ -74,12 +74,12 @@ func Run(args []string) int {
 }
 
 func printHelp() {
-	fmt.Println("usage: mm install [--install-dir DIR] [--no-modify-path] [--theme NAME]")
+	fmt.Println("usage: miru install [--install-dir DIR] [--no-modify-path] [--theme NAME]")
 	fmt.Println()
 	fmt.Println("environment overrides:")
 	fmt.Println("  INSTALL_DIR             target directory (default: $HOME/.local/bin)")
-	fmt.Println("  MUMEI_NO_MODIFY_PATH    set to 1 to skip shell rc PATH update")
-	fmt.Println("  MUMEI_THEME             color theme for installer UI")
+	fmt.Println("  MIRU_NO_MODIFY_PATH    set to 1 to skip shell rc PATH update")
+	fmt.Println("  MIRU_THEME             color theme for installer UI")
 }
 
 type Config struct {
@@ -97,10 +97,10 @@ func defaultConfig() Config {
 	if v := os.Getenv("INSTALL_DIR"); v != "" {
 		cfg.InstallDir = v
 	}
-	if os.Getenv("MUMEI_NO_MODIFY_PATH") == "1" {
+	if os.Getenv("MIRU_NO_MODIFY_PATH") == "1" {
 		cfg.NoModifyPath = true
 	}
-	if v := os.Getenv("MUMEI_THEME"); v != "" {
+	if v := os.Getenv("MIRU_THEME"); v != "" {
 		cfg.Theme = v
 	}
 	return cfg
@@ -192,7 +192,7 @@ func runStep(cfg Config, i int) tea.Cmd {
 			return stepResult{index: i, status: stepDone, detail: friendlyPath(path)}
 		case 1:
 			if cfg.NoModifyPath {
-				return stepResult{index: i, status: stepSkipped, detail: "skipped (MUMEI_NO_MODIFY_PATH=1)"}
+				return stepResult{index: i, status: stepSkipped, detail: "skipped (MIRU_NO_MODIFY_PATH=1)"}
 			}
 			rc, action, err := configurePath(cfg)
 			if err != nil {
@@ -274,7 +274,7 @@ func (m model) View() tea.View {
 	bold := lipgloss.NewStyle().Bold(true).Foreground(m.accent)
 	bad := lipgloss.NewStyle().Foreground(m.bad)
 
-	title := bold.Render("mumei-md installer")
+	title := bold.Render("miru installer")
 	subtitle := muted.Render(fmt.Sprintf("%s · %s/%s", Version, runtime.GOOS, runtime.GOARCH))
 
 	var sb strings.Builder
@@ -306,7 +306,7 @@ func (m model) View() tea.View {
 		if m.failed {
 			sb.WriteString(bad.Render(" install failed — see error above") + "\n")
 		} else {
-			sb.WriteString(" " + accent.Render("ready.") + " try it: " + bold.Render("mm sample.md") + "\n")
+			sb.WriteString(" " + accent.Render("ready.") + " try it: " + bold.Render("miru sample.md") + "\n")
 		}
 	}
 

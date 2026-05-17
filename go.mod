@@ -1,4 +1,4 @@
-module github.com/hir4ta/mumei-md
+module github.com/hir4ta/miru
 
 go 1.26.1
 

@@ -1,4 +1,4 @@
-# mumei-md
+# miru
 
 A rich-looking Markdown viewer you can open in your terminal.
 
@@ -7,18 +7,18 @@ A rich-looking Markdown viewer you can open in your terminal.
 One-liner. No Go toolchain required:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/hir4ta/mumei-md/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 ```
 
-The shell bootstrap downloads a prebuilt static binary for your platform, then hands off to `mm install` — a Bubble Tea install UI that self-installs the binary, configures your shell rc PATH, and verifies the result.
+The shell bootstrap downloads a prebuilt static binary for your platform, then hands off to `miru install` — a Bubble Tea install UI that self-installs the binary, configures your shell rc PATH, and verifies the result.
 
 Supported platforms: macOS (Intel / Apple Silicon), Linux (x86_64 / arm64). Shell rc handled: zsh, bash, fish.
 
 You can also run the installer directly any time after the binary is on disk:
 
 ```sh
-mm install                     # re-run with the rich UI
-mm install --no-modify-path    # only install the binary, skip PATH update
+miru install                     # re-run with the rich UI
+miru install --no-modify-path    # only install the binary, skip PATH update
 ```
 
 Environment overrides:
@@ -27,27 +27,27 @@ Environment overrides:
 |---|---|---|
 | `VERSION` | latest release | pin a specific tag (e.g. `v0.1.0`) |
 | `INSTALL_DIR` | `$HOME/.local/bin` | binary destination |
-| `MUMEI_NO_MODIFY_PATH` | `0` | set to `1` to skip the shell rc update |
+| `MIRU_NO_MODIFY_PATH` | `0` | set to `1` to skip the shell rc update |
 
 Example:
 
 ```sh
-VERSION=v0.1.0 INSTALL_DIR=/usr/local/bin MUMEI_NO_MODIFY_PATH=1 \
-  curl -fsSL https://raw.githubusercontent.com/hir4ta/mumei-md/main/install.sh | sh
+VERSION=v0.1.0 INSTALL_DIR=/usr/local/bin MIRU_NO_MODIFY_PATH=1 \
+  curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 ```
 
 If you have a Go toolchain, you can also build from source:
 
 ```sh
-go install github.com/hir4ta/mumei-md/cmd/mm@latest
+go install github.com/hir4ta/miru/cmd/miru@latest
 ```
 
 ## Usage
 
 ```sh
-mm README.md
-mm --theme gruvbox README.md
-mm --list-themes
+miru README.md
+miru --theme gruvbox README.md
+miru --list-themes
 ```
 
 ## Key bindings
@@ -78,12 +78,12 @@ The default is a warm coral/terracotta theme inspired by Claude Code (`claude`).
 ### Precedence
 
 ```
---theme flag  >  $MUMEI_THEME env var  >  config file  >  claude
+--theme flag  >  $MIRU_THEME env var  >  config file  >  claude
 ```
 
 ### Config file
 
-`~/.config/mumei-md/config.json` (or `$XDG_CONFIG_HOME/mumei-md/config.json`):
+`~/.config/miru/config.json` (or `$XDG_CONFIG_HOME/miru/config.json`):
 
 ```json
 {
