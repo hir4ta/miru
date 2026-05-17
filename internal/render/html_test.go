@@ -68,6 +68,9 @@ func TestToHTML_FontsAlwaysLoadedMermaidGated(t *testing.T) {
 	for _, want := range []string{
 		`look: "handDrawn"`,
 		`cdn.jsdelivr.net/npm/mermaid@11`,
+		`cdn.jsdelivr.net/npm/svg-pan-zoom`,
+		`class="mermaid-zoom"`,
+		`svgPanZoom(`,
 	} {
 		if !strings.Contains(string(out), want) {
 			t.Errorf("with-mermaid: html missing %q", want)
@@ -81,6 +84,8 @@ func TestToHTML_FontsAlwaysLoadedMermaidGated(t *testing.T) {
 	for _, dontWant := range []string{
 		"handDrawn",
 		"cdn.jsdelivr.net/npm/mermaid",
+		"svg-pan-zoom",
+		"mermaid-zoom",
 	} {
 		if strings.Contains(string(out), dontWant) {
 			t.Errorf("no-mermaid: html should not contain %q", dontWant)

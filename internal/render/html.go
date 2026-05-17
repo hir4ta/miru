@@ -215,17 +215,74 @@ body.markdown-body {
   height: auto;
   font-family: "Caveat", "Virgil", cursive;
   font-size: 18px;
+  cursor: zoom-in;
 }
 .mermaid .nodeLabel,
 .mermaid .edgeLabel,
 .mermaid .cluster-label,
 .mermaid text { font-family: inherit; }
+.mermaid-zoom {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 30, 29, 0.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.mermaid-zoom.open { display: flex; }
+.mermaid-zoom__stage {
+  width: 90vw;
+  height: 90vh;
+  background: var(--paper);
+  border-radius: 8px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.45);
+  padding: 28px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+.mermaid-zoom__stage > svg { width: 100%; height: 100%; cursor: grab; }
+.mermaid-zoom__stage > svg:active { cursor: grabbing; }
+.mermaid-zoom__close {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  font-size: 2em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.mermaid-zoom__close:hover { color: var(--accent); }
+.mermaid-zoom__hint {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: var(--muted);
+  font-family: "Caveat", cursive;
+  font-size: 1.2em;
+  pointer-events: none;
+}
 {{- end}}
 </style>
 </head>
 <body class="markdown-body">
 {{.Body}}
 {{- if .HasMermaid}}
+<div class="mermaid-zoom" id="mermaid-zoom" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Diagram zoom view">
+  <div class="mermaid-zoom__stage" id="mermaid-zoom-stage">
+    <button type="button" class="mermaid-zoom__close" id="mermaid-zoom-close" aria-label="Close diagram zoom">×</button>
+    <div class="mermaid-zoom__hint">scroll to zoom · drag to pan · esc to close</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.2/dist/svg-pan-zoom.min.js"></script>
 <script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 mermaid.initialize({
@@ -241,7 +298,74 @@ document.querySelectorAll("pre > code.language-mermaid").forEach(code => {
   div.textContent = code.textContent;
   code.parentElement.replaceWith(div);
 });
-mermaid.run();
+await mermaid.run();
+
+const modal = document.getElementById("mermaid-zoom");
+const stage = document.getElementById("mermaid-zoom-stage");
+const closeBtn = document.getElementById("mermaid-zoom-close");
+let panZoom = null;
+let previousFocus = null;
+
+function closeModal() {
+  if (panZoom) { panZoom.destroy(); panZoom = null; }
+  stage.querySelectorAll("svg").forEach(svg => svg.remove());
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  if (previousFocus && typeof previousFocus.focus === "function") {
+    try { previousFocus.focus(); } catch (_) { /* element may be gone */ }
+  }
+  previousFocus = null;
+}
+function openModal(sourceSvg) {
+  previousFocus = document.activeElement;
+  const clone = sourceSvg.cloneNode(true);
+  clone.removeAttribute("style");
+  clone.setAttribute("width", "100%");
+  clone.setAttribute("height", "100%");
+  stage.appendChild(clone);
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  closeBtn.focus();
+  panZoom = svgPanZoom(clone, {
+    controlIconsEnabled: false,
+    fit: true,
+    center: true,
+    zoomScaleSensitivity: 0.3,
+    minZoom: 0.3,
+    maxZoom: 20,
+  });
+}
+closeBtn.addEventListener("click", closeModal);
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", e => {
+  if (!modal.classList.contains("open")) return;
+  if (e.key === "Escape") { closeModal(); return; }
+  if (e.key === "Tab") {
+    // The dialog only exposes one focusable element (the close button);
+    // keep keyboard navigation inside the dialog while it is open.
+    e.preventDefault();
+    closeBtn.focus();
+  }
+});
+// Defensive trap: if focus escapes (e.g. assistive tech jump), pull it back.
+document.addEventListener("focusin", e => {
+  if (modal.classList.contains("open") && !modal.contains(e.target)) {
+    closeBtn.focus();
+  }
+});
+// Make inline diagrams keyboard-accessible: Enter / Space opens the zoom modal.
+document.querySelectorAll(".mermaid > svg").forEach(svg => {
+  svg.setAttribute("role", "button");
+  svg.setAttribute("tabindex", "0");
+  svg.setAttribute("aria-label", "Open diagram in zoom view");
+  svg.addEventListener("click", () => openModal(svg));
+  svg.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openModal(svg);
+    }
+  });
+});
 </script>
 {{- end}}
 </body>
