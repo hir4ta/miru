@@ -143,3 +143,19 @@ func TestSourceToHTML_StaysLocal(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceToHTML_EscapesFilename(t *testing.T) {
+	// The filename is reflected into <title> and <h1> verbatim before this fix,
+	// so any HTML in the basename (possible when the loopback server follows a
+	// link to a hostile file name) would execute. Filenames must be escaped.
+	out, err := SourceToHTML("<img src=x onerror=alert(1)>.txt", "hi\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(out), "<img src=x onerror=alert(1)>") {
+		t.Errorf("SourceToHTML rendered unescaped <img> from filename")
+	}
+	if !strings.Contains(string(out), "&lt;img src=x onerror=alert(1)&gt;") {
+		t.Errorf("SourceToHTML did not HTML-escape filename")
+	}
+}
