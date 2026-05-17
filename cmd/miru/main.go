@@ -72,6 +72,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "abs %s: %v\n", path, err)
 		os.Exit(1)
 	}
+	// Resolve symlinks so the server's sandbox root matches what the request
+	// handler will compute when EvalSymlink-ing the URL path. Without this,
+	// `b` on a symlinked entry file would be rejected as outside the root.
+	if resolved, err := filepath.EvalSymlinks(absPath); err == nil {
+		absPath = resolved
+	}
 	srv, err := server.Start(filepath.Dir(absPath))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "start server: %v\n", err)

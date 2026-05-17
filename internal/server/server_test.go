@@ -124,6 +124,56 @@ func TestServer_NotFound(t *testing.T) {
 	}
 }
 
+func TestServer_FollowsRelativeMarkdownLink(t *testing.T) {
+	// The whole point of the loopback server: a relative href in one rendered
+	// Markdown file must resolve to another file under the same root, served
+	// through the same render pipeline.
+	dir := t.TempDir()
+	indexPath := filepath.Join(dir, "index.md")
+	otherPath := filepath.Join(dir, "other.md")
+	if err := os.WriteFile(indexPath, []byte("# Index\n\n[next](./other.md)\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(otherPath, []byte("# Other Page\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	srv := startServer(t, dir)
+
+	url, _ := srv.URLFor(otherPath)
+	resp := get(t, url)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), "Other Page") {
+		t.Errorf("body missing 'Other Page'")
+	}
+}
+
+func TestServer_RejectsSymlinkEscape(t *testing.T) {
+	// A symlink living inside the root but pointing outside must be rejected;
+	// otherwise the sandbox is bypassed via any attacker-placed symlink.
+	root := t.TempDir()
+	outside := t.TempDir()
+	target := filepath.Join(outside, "secret.md")
+	if err := os.WriteFile(target, []byte("# Secret\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(root, "trap.md")
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+	srv := startServer(t, root)
+
+	// Build the URL by hand: we want to request the symlink path itself,
+	// without URLFor's EvalSymlinks step that would canonicalise it away.
+	addr := srv.listener.Addr().String()
+	resp := get(t, "http://"+addr+link)
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("status %d, want 403", resp.StatusCode)
+	}
+}
+
 func TestServer_URLForEncodesUnicode(t *testing.T) {
 	dir := t.TempDir()
 	jp := filepath.Join(dir, "前提.md")

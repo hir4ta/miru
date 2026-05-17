@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"mime"
 	"net"
 	"net/http"
@@ -66,11 +65,17 @@ func (s *Server) Stop() error {
 }
 
 // URLFor builds the loopback URL that renders the given file. The path is
-// resolved to absolute form so callers can pass CLI-style relative inputs.
+// resolved to absolute form and symlinks are followed so the URL matches
+// where the file actually lives; relative links inside the rendered HTML
+// then resolve relative to the real file's directory rather than the
+// symlink's parent.
 func (s *Server) URLFor(path string) (string, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
+	}
+	if resolved, err := filepath.EvalSymlinks(abs); err == nil {
+		abs = resolved
 	}
 	u := url.URL{
 		Scheme: "http",
@@ -137,28 +142,23 @@ func (s *Server) serveFile(w http.ResponseWriter, path string) error {
 		return err
 	}
 
-	ct := mime.TypeByExtension(filepath.Ext(path))
-	if isBinaryMime(ct) {
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		w.Header().Set("Content-Type", ct)
-		_, err = io.Copy(w, f)
-		return err
-	}
-
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	html, err := render.SourceToHTML(path, string(data))
-	if err != nil {
+	if looksLikeText(data, path) {
+		html, err := render.SourceToHTML(path, string(data))
+		if err != nil {
+			return err
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, err = w.Write(html)
 		return err
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, err = w.Write(html)
+	if ct := mime.TypeByExtension(filepath.Ext(path)); ct != "" {
+		w.Header().Set("Content-Type", ct)
+	}
+	_, err = w.Write(data)
 	return err
 }
 
@@ -173,25 +173,19 @@ func pathInside(target, root string) bool {
 	return true
 }
 
-func isBinaryMime(ct string) bool {
-	if ct == "" {
-		return false
-	}
-	if strings.HasPrefix(ct, "image/") ||
-		strings.HasPrefix(ct, "video/") ||
-		strings.HasPrefix(ct, "audio/") ||
-		strings.HasPrefix(ct, "font/") {
+// looksLikeText decides whether a non-markdown asset should be wrapped in
+// SourceToHTML (syntax-highlighted preview) or served as raw bytes. Anything
+// not clearly text — images, archives, wasm, executables — is served raw so
+// the browser can render it natively.
+func looksLikeText(data []byte, path string) bool {
+	if ct := mime.TypeByExtension(filepath.Ext(path)); strings.HasPrefix(ct, "text/") {
 		return true
 	}
-	switch ct {
-	case "application/pdf",
-		"application/zip",
-		"application/gzip",
-		"application/x-tar",
-		"application/octet-stream":
-		return true
+	head := data
+	if len(head) > 512 {
+		head = head[:512]
 	}
-	return false
+	return strings.HasPrefix(http.DetectContentType(head), "text/")
 }
 
 func openCmd(target string) error {
