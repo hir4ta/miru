@@ -24,41 +24,33 @@ import (
 var assetsFS embed.FS
 
 const htmlTemplate = `<!DOCTYPE html>
-<html lang="en">
+<html lang="mul">
 <head>
 <meta charset="utf-8">
 <title>{{.Title}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Patrick+Hand&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Patrick+Hand&family=Kiwi+Maru:wght@400;500&display=swap" rel="stylesheet">
 <style>{{.CSS}}</style>
 <style>
-:root { color-scheme: light; --paper: #fdf6e3; --rule: #e5dcc5; --ink: #3a342c; --accent: #d97757; --muted: #7a6c52; --highlight: #ffe599; }
+:root { color-scheme: light; --paper: #fdf6e3; --ink: #3a342c; --accent: #d97757; --muted: #7a6c52; --highlight: #ffe599; }
 html, body { background: var(--paper); }
 body.markdown-body {
   box-sizing: border-box;
   min-width: 200px;
-  max-width: 880px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 56px 64px;
   background-color: var(--paper);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(1.7em - 1px),
-    var(--rule) calc(1.7em - 1px),
-    var(--rule) 1.7em
-  );
-  background-position: 0 0.8em;
   color: var(--ink);
-  font-family: "Patrick Hand", "Klee One", "ヒラギノ丸ゴ ProN", "Hiragino Maru Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  font-family: "Patrick Hand", "Kiwi Maru", "ヒラギノ丸ゴ ProN", "Hiragino Maru Gothic ProN", "Yu Gothic", system-ui, sans-serif;
   font-size: 18px;
   line-height: 1.7em;
 }
 @media (max-width: 767px) { body.markdown-body { padding: 24px 18px; } }
 .markdown-body h1, .markdown-body h2, .markdown-body h3,
 .markdown-body h4, .markdown-body h5, .markdown-body h6 {
-  font-family: "Caveat", "Klee One", cursive;
+  font-family: "Caveat", "Kiwi Maru", cursive;
   font-weight: 700;
   color: var(--accent);
   line-height: 1.2;
@@ -99,20 +91,10 @@ body.markdown-body {
 }
 .markdown-body blockquote {
   border-left: 4px solid var(--accent);
-  background: transparent;
   color: var(--muted);
   font-style: italic;
   padding: 0 1em;
   margin: 1em 0;
-  position: relative;
-}
-.markdown-body blockquote::before {
-  content: "※";
-  position: absolute;
-  left: -1.6em;
-  top: 0;
-  color: var(--accent);
-  font-style: normal;
 }
 .markdown-body ul, .markdown-body ol { padding-left: 1.6em; }
 .markdown-body ul { list-style: none; }
@@ -152,12 +134,35 @@ body.markdown-body {
 }
 .markdown-body hr {
   border: 0;
-  height: 24px;
-  background-color: transparent;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'><path d='M0 6 Q 15 0 30 6 T 60 6 T 90 6 T 120 6' fill='none' stroke='%237a6c52' stroke-width='1.5' stroke-linecap='round'/></svg>");
-  background-repeat: repeat-x;
-  background-position: center;
-  margin: 1.8em 0;
+  height: auto;
+  background: transparent;
+  text-align: center;
+  margin: 2em 0;
+  position: relative;
+  line-height: 1;
+}
+.markdown-body hr::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--muted);
+  opacity: 0.35;
+  z-index: 0;
+}
+.markdown-body hr::before {
+  content: "〜〜〜";
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  background-color: var(--paper);
+  padding: 0 0.6em;
+  font-family: "Caveat", "Kiwi Maru", cursive;
+  font-weight: 700;
+  font-size: 1.6em;
+  color: var(--muted);
+  letter-spacing: 0.15em;
 }
 .markdown-body table {
   border-collapse: collapse;
@@ -171,7 +176,7 @@ body.markdown-body {
   color: var(--ink);
 }
 .markdown-body table th {
-  font-family: "Caveat", cursive;
+  font-family: "Caveat", "Kiwi Maru", cursive;
   font-weight: 700;
   font-size: 1.2em;
   color: var(--accent);
