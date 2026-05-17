@@ -144,8 +144,11 @@ best theme experience.
   is rendered as a handwritten paper note (cream background +
   Caveat for headings + Patrick Hand for body + Kiwi Maru for
   CJK), so it always embeds the Google Fonts stylesheet. When the Markdown also contains a `mermaid`
-  code block, the page additionally embeds mermaid.js from
-  jsDelivr and the diagram renders in `look: "handDrawn"`. The
+  code block, the page additionally embeds mermaid.js and
+  svg-pan-zoom from jsDelivr; the diagram renders in
+  `look: "handDrawn"` and is click-to-zoom (clicking the SVG
+  opens a fullscreen modal with wheel-zoom + drag-pan, dismissed
+  by Escape / outside-click / ×). The
   Source HTML page is intentionally **not** styled as a note —
   it stays a dark, monospace, fully-local page so reading code
   is not impaired. Both behaviours are documented in
