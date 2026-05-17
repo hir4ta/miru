@@ -2,6 +2,12 @@
 
 A quiet file viewer for your terminal. Markdown gets a full glamour render with mermaid in the browser; source and config files get chroma-powered syntax highlighting.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d5f7afa5-d8be-401d-bda5-04dae2ad8bbe" alt="miru rendering sample.md" width="32%">
+  <img src="https://github.com/user-attachments/assets/1be2b6a1-d058-4819-99df-64a75eab4810" alt="miru rendering sample.js" width="32%">
+  <img src="https://github.com/user-attachments/assets/a7ad20b7-47cd-4f8f-a657-a0de22bee189" alt="miru rendering sample.py" width="32%">
+</p>
+
 ## Install
 
 One-liner. No Go toolchain required:
