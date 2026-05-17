@@ -1,0 +1,43 @@
+package tui
+
+import (
+	"charm.land/bubbles/v2/help"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/hir4ta/mumei-md/internal/nav"
+	"github.com/hir4ta/mumei-md/internal/render"
+)
+
+type Model struct {
+	filename string
+	raw      string
+	theme    string
+	ansi     *render.ANSI
+
+	viewport viewport.Model
+	help     help.Model
+	keys     KeyMap
+
+	headings []nav.Heading
+	settings settingsModel
+	helpOpen bool
+
+	winW, winH int
+	ready      bool
+	err        error
+}
+
+func New(filename, raw, theme string) Model {
+	return Model{
+		filename: filename,
+		raw:      raw,
+		theme:    theme,
+		keys:     DefaultKeyMap(),
+		help:     help.New(),
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
+}
