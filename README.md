@@ -71,6 +71,16 @@ VERSION=v0.1.0 INSTALL_DIR=/usr/local/bin MIRU_NO_MODIFY_PATH=1 \
   curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 ```
 
+### Uninstall
+
+```sh
+brew uninstall miru && brew untap hir4ta/tap     # Homebrew
+rm "$(command -v miru)"                          # bootstrap or go install
+rm -rf ~/.config/miru                            # remove config (theme choice)
+```
+
+If the bootstrap installer added a PATH line to your shell rc, remove the block marked `# added by miru installer` from `~/.zshrc`, `~/.bashrc`, `~/.bash_profile`, or `~/.config/fish/config.fish`.
+
 ## Usage
 
 ```sh
