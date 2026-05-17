@@ -15,23 +15,33 @@ import (
 )
 
 func main() {
-	if len(os.Args) >= 2 && os.Args[1] == "install" {
-		os.Exit(installer.Run(os.Args[2:]))
+	if len(os.Args) >= 2 {
+		switch os.Args[1] {
+		case "install":
+			os.Exit(installer.Run(os.Args[2:]))
+		case "update":
+			os.Exit(installer.UpdateRun(os.Args[2:]))
+		case "version":
+			fmt.Println(installer.Version)
+			return
+		}
 	}
 
 	var (
-		theme      string
-		listThemes bool
+		theme       string
+		listThemes  bool
+		showVersion bool
 	)
-	flag.StringVar(&theme, "theme", "", "color theme (overrides config); see -list-themes")
-	flag.BoolVar(&listThemes, "list-themes", false, "list available themes and exit")
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage:\n")
-		fmt.Fprintf(os.Stderr, "  mm [--theme NAME] <markdown-file>\n")
-		fmt.Fprintf(os.Stderr, "  mm install                    install/upgrade & wire up PATH\n\n")
-		flag.PrintDefaults()
-	}
+	flag.StringVar(&theme, "theme", "", "color theme")
+	flag.BoolVar(&listThemes, "list-themes", false, "list themes")
+	flag.BoolVar(&showVersion, "version", false, "print version")
+	flag.Usage = usage
 	flag.Parse()
+
+	if showVersion {
+		fmt.Println(installer.Version)
+		return
+	}
 
 	if listThemes {
 		for _, t := range render.AvailableThemes() {
@@ -42,7 +52,7 @@ func main() {
 
 	args := flag.Args()
 	if len(args) < 1 {
-		flag.Usage()
+		usage()
 		os.Exit(2)
 	}
 	path := args[0]
@@ -62,8 +72,22 @@ func main() {
 	}
 }
 
+func usage() {
+	fmt.Fprintln(os.Stderr, `usage:
+  mm [--theme NAME] <markdown-file>      view a markdown file in the TUI
+  mm install                             install/repair & wire up PATH
+  mm update                              replace this binary with the latest release
+  mm version                             print version
+
+flags:
+  --theme NAME                           color theme (see --list-themes)
+  --list-themes                          list available themes and exit
+  --version                              print version and exit`)
+}
+
 // resolveTheme picks the theme using precedence:
-//   --theme flag > $MUMEI_THEME > config file > render.DefaultTheme
+//
+//	--theme flag > $MUMEI_THEME > config file > render.DefaultTheme
 func resolveTheme(flagValue string) string {
 	if strings.TrimSpace(flagValue) != "" {
 		return flagValue
