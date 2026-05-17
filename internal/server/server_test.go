@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -125,9 +127,10 @@ func TestServer_NotFound(t *testing.T) {
 }
 
 func TestServer_FollowsRelativeMarkdownLink(t *testing.T) {
-	// The whole point of the loopback server: a relative href in one rendered
-	// Markdown file must resolve to another file under the same root, served
-	// through the same render pipeline.
+	// End-to-end check of the whole point of this server: render index.md,
+	// pull the rendered <a href="..."> out of the response, resolve it
+	// against the index URL the way a browser would, fetch the resolved
+	// URL, and verify the linked file rendered.
 	dir := t.TempDir()
 	indexPath := filepath.Join(dir, "index.md")
 	otherPath := filepath.Join(dir, "other.md")
@@ -139,14 +142,37 @@ func TestServer_FollowsRelativeMarkdownLink(t *testing.T) {
 	}
 	srv := startServer(t, dir)
 
-	url, _ := srv.URLFor(otherPath)
-	resp := get(t, url)
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("status %d", resp.StatusCode)
+	indexURL, err := srv.URLFor(indexPath)
+	if err != nil {
+		t.Fatal(err)
 	}
-	body, _ := io.ReadAll(resp.Body)
-	if !strings.Contains(string(body), "Other Page") {
-		t.Errorf("body missing 'Other Page'")
+	indexResp := get(t, indexURL)
+	if indexResp.StatusCode != http.StatusOK {
+		t.Fatalf("index status %d", indexResp.StatusCode)
+	}
+	body, _ := io.ReadAll(indexResp.Body)
+
+	hrefRe := regexp.MustCompile(`<a[^>]+href="([^"]+)"[^>]*>next</a>`)
+	m := hrefRe.FindStringSubmatch(string(body))
+	if m == nil {
+		t.Fatalf("rendered HTML missing 'next' link: %s", string(body[:min(500, len(body))]))
+	}
+	base, err := url.Parse(indexURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	target, err := base.Parse(m[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	linkedResp := get(t, target.String())
+	if linkedResp.StatusCode != http.StatusOK {
+		t.Fatalf("linked status %d for %s", linkedResp.StatusCode, target)
+	}
+	linkedBody, _ := io.ReadAll(linkedResp.Body)
+	if !strings.Contains(string(linkedBody), "Other Page") {
+		t.Errorf("linked body missing 'Other Page'")
 	}
 }
 

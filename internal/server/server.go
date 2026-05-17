@@ -68,7 +68,10 @@ func (s *Server) Stop() error {
 // resolved to absolute form and symlinks are followed so the URL matches
 // where the file actually lives; relative links inside the rendered HTML
 // then resolve relative to the real file's directory rather than the
-// symlink's parent.
+// symlink's parent. If the file does not exist (e.g. a URL for a broken
+// link the caller still wants to fetch), the parent directory is
+// canonicalised instead so the resulting URL still survives the server's
+// lexical sandbox check.
 func (s *Server) URLFor(path string) (string, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
@@ -76,6 +79,8 @@ func (s *Server) URLFor(path string) (string, error) {
 	}
 	if resolved, err := filepath.EvalSymlinks(abs); err == nil {
 		abs = resolved
+	} else if dir, err := filepath.EvalSymlinks(filepath.Dir(abs)); err == nil {
+		abs = filepath.Join(dir, filepath.Base(abs))
 	}
 	u := url.URL{
 		Scheme: "http",
@@ -100,6 +105,13 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "absolute path required", http.StatusBadRequest)
 		return
 	}
+	// Lexical sandbox check FIRST. Calling Stat / EvalSymlinks on an outside
+	// path would leak existence (200/404/500 vs 403) and let a probe map the
+	// filesystem; reject before touching disk.
+	if !pathInside(requested, s.root) {
+		http.Error(w, "outside server root", http.StatusForbidden)
+		return
+	}
 	resolved, err := filepath.EvalSymlinks(requested)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -109,6 +121,8 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Re-check after symlink resolution: a symlink inside the root may point
+	// to a target outside it.
 	if !pathInside(resolved, s.root) {
 		http.Error(w, "outside server root", http.StatusForbidden)
 		return
