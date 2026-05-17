@@ -144,12 +144,18 @@ body.markdown-body {
 }
 .markdown-body hr {
   border: 0;
-  height: 24px;
-  background-color: transparent;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'><path d='M0 6 Q 15 0 30 6 T 60 6 T 90 6 T 120 6' fill='none' stroke='%237a6c52' stroke-width='1.5' stroke-linecap='round'/></svg>");
-  background-repeat: repeat-x;
-  background-position: center;
-  margin: 1.8em 0;
+  height: auto;
+  background: transparent;
+  text-align: center;
+  margin: 2em 0;
+}
+.markdown-body hr::before {
+  content: "〜〜〜";
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  font-size: 1.6em;
+  color: var(--muted);
+  letter-spacing: 0.15em;
 }
 .markdown-body table {
   border-collapse: collapse;
