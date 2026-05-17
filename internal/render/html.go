@@ -148,10 +148,27 @@ body.markdown-body {
   background: transparent;
   text-align: center;
   margin: 2em 0;
+  position: relative;
+  line-height: 1;
+}
+.markdown-body hr::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--muted);
+  opacity: 0.35;
+  z-index: 0;
 }
 .markdown-body hr::before {
   content: "〜〜〜";
-  font-family: "Caveat", cursive;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  background-color: var(--paper);
+  padding: 0 0.6em;
+  font-family: "Caveat", "Kiwi Maru", cursive;
   font-weight: 700;
   font-size: 1.6em;
   color: var(--muted);
