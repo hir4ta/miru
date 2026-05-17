@@ -12,9 +12,11 @@ import (
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/text"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
@@ -26,9 +28,11 @@ const htmlTemplate = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <title>{{.Title}}</title>
+{{- if .HasMermaid}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+{{- end}}
 <style>{{.CSS}}</style>
 <style>
 :root { color-scheme: dark light; }
@@ -40,21 +44,24 @@ body.markdown-body {
   padding: 45px;
 }
 @media (max-width: 767px) { body.markdown-body { padding: 15px; } }
+{{- if .HasMermaid}}
 .mermaid { display: flex; justify-content: center; margin: 1.25em 0; }
 .mermaid svg {
   max-width: 100%;
   height: auto;
-  font-family: "Caveat", "Virgil", "Patrick Hand", cursive;
+  font-family: "Caveat", "Virgil", cursive;
   font-size: 18px;
 }
 .mermaid .nodeLabel,
 .mermaid .edgeLabel,
 .mermaid .cluster-label,
 .mermaid text { font-family: inherit; }
+{{- end}}
 </style>
 </head>
 <body class="markdown-body">
 {{.Body}}
+{{- if .HasMermaid}}
 <script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -73,8 +80,16 @@ document.querySelectorAll("pre > code.language-mermaid").forEach(code => {
 });
 mermaid.run();
 </script>
+{{- end}}
 </body>
 </html>`
+
+type htmlTemplateData struct {
+	Title      string
+	CSS        template.CSS
+	Body       template.HTML
+	HasMermaid bool
+}
 
 func ToHTML(filename, markdown string) ([]byte, error) {
 	md := goldmark.New(
@@ -114,19 +129,40 @@ func ToHTML(filename, markdown string) ([]byte, error) {
 	}
 
 	var out bytes.Buffer
-	err = tmpl.Execute(&out, struct {
-		Title string
-		CSS   template.CSS
-		Body  template.HTML
-	}{
-		Title: filepath.Base(filename),
-		CSS:   template.CSS(css),
-		Body:  template.HTML(body.String()),
+	err = tmpl.Execute(&out, htmlTemplateData{
+		Title:      filepath.Base(filename),
+		CSS:        template.CSS(css),
+		Body:       template.HTML(body.String()),
+		HasMermaid: hasMermaidBlock(markdown),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return out.Bytes(), nil
+}
+
+// hasMermaidBlock reports whether the markdown contains at least one fenced
+// code block declared as `mermaid`. Used to gate mermaid.js + Caveat font
+// loading so plain markdown previews stay fully local.
+func hasMermaidBlock(markdown string) bool {
+	source := []byte(markdown)
+	root := goldmark.New().Parser().Parse(text.NewReader(source))
+	found := false
+	_ = ast.Walk(root, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		cb, ok := n.(*ast.FencedCodeBlock)
+		if !ok {
+			return ast.WalkContinue, nil
+		}
+		if string(cb.Language(source)) == "mermaid" {
+			found = true
+			return ast.WalkStop, nil
+		}
+		return ast.WalkContinue, nil
+	})
+	return found
 }
 
 func OpenInBrowser(filename, content string) error {
