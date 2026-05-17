@@ -10,10 +10,13 @@ import (
 )
 
 type Model struct {
-	filename string
-	raw      string
-	theme    string
-	ansi     *render.ANSI
+	filename   string
+	raw        string
+	theme      string
+	isMarkdown bool
+
+	ansi   *render.ANSI   // populated when isMarkdown
+	source *render.Source // populated otherwise
 
 	viewport viewport.Model
 	help     help.Model
@@ -30,11 +33,12 @@ type Model struct {
 
 func New(filename, raw, theme string) Model {
 	return Model{
-		filename: filename,
-		raw:      raw,
-		theme:    theme,
-		keys:     DefaultKeyMap(),
-		help:     help.New(),
+		filename:   filename,
+		raw:        raw,
+		theme:      theme,
+		isMarkdown: render.IsMarkdown(filename),
+		keys:       DefaultKeyMap(),
+		help:       help.New(),
 	}
 }
 

@@ -1,6 +1,6 @@
 # miru
 
-A rich-looking Markdown viewer you can open in your terminal.
+A quiet file viewer for your terminal. Markdown gets a full glamour render with mermaid in the browser; source and config files get chroma-powered syntax highlighting.
 
 ## Install
 
@@ -45,10 +45,15 @@ go install github.com/hir4ta/miru/cmd/miru@latest
 ## Usage
 
 ```sh
-miru README.md
+miru README.md           # markdown (glamour)
+miru main.go             # source (chroma syntax highlight)
+miru config.yaml         # config (chroma)
+miru Dockerfile          # filename-detected (chroma)
 miru --theme gruvbox README.md
 miru --list-themes
 ```
+
+Files with a `.md` / `.markdown` extension take the markdown path (glamour ANSI in the TUI, goldmark + github-markdown.css + mermaid.js in the browser). Everything else takes the chroma path with line numbers in the TUI and a styled HTML page in the browser.
 
 ## Key bindings
 
@@ -57,7 +62,7 @@ miru --list-themes
 | `j` / `k` | Scroll one line |
 | `Ctrl+d` / `Ctrl+u` | Half page scroll |
 | `g` / `G` | Top / bottom |
-| `{` / `}` | Jump to previous / next heading |
+| `{` / `}` | Jump to previous / next heading (markdown only) |
 | `b` | Open in browser |
 | `?` | Help |
 | `q` | Quit |

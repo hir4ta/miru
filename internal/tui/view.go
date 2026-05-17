@@ -86,7 +86,11 @@ func (m Model) headerView() string {
 
 func (m Model) footerView() string {
 	pct := m.viewport.ScrollPercent() * 100
-	info := m.infoStyle().Render(fmt.Sprintf("%3.0f%% · %s", pct, m.theme))
+	text := fmt.Sprintf("%3.0f%% · %s", pct, m.theme)
+	if !m.isMarkdown {
+		text = fmt.Sprintf("%3.0f%% · %s · %s", pct, m.theme, render.LanguageFor(m.filename))
+	}
+	info := m.infoStyle().Render(text)
 	width := m.viewport.Width()
 	pad := max(0, width-lipgloss.Width(info))
 	line := m.dividerStyle().Render(strings.Repeat("─", pad))

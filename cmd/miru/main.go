@@ -74,15 +74,15 @@ func main() {
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  miru [--theme NAME] <markdown-file>      view a markdown file in the TUI
+  miru [--theme NAME] <file>               view a markdown, source, or config file
   miru install                             install/repair & wire up PATH
   miru update                              replace this binary with the latest release
   miru version                             print version
 
 flags:
-  --theme NAME                           color theme (see --list-themes)
-  --list-themes                          list available themes and exit
-  --version                              print version and exit`)
+  --theme NAME                             color theme (see --list-themes)
+  --list-themes                            list available themes and exit
+  --version                                print version and exit`)
 }
 
 // resolveTheme picks the theme using precedence:

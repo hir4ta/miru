@@ -24,23 +24,43 @@ func (m *Model) layout() {
 }
 
 func (m *Model) renderContent() error {
-	rendered, err := m.ansi.Render(m.raw)
-	if err != nil {
-		return err
+	var (
+		rendered string
+		err      error
+	)
+	if m.isMarkdown {
+		rendered, err = m.ansi.Render(m.raw)
+		if err != nil {
+			return err
+		}
+		m.headings = nav.MapToLines(nav.Extract(m.raw), rendered)
+	} else {
+		rendered, err = m.source.Render(m.filename, m.raw)
+		if err != nil {
+			return err
+		}
+		m.headings = nil
 	}
-	m.headings = nav.MapToLines(nav.Extract(m.raw), rendered)
 	m.viewport.SetContent(rendered)
 	return nil
 }
 
-// applyTheme rebuilds the renderer with the given theme, re-renders the
-// markdown, and persists the choice to the config file.
+// applyTheme rebuilds the active renderer with the given theme, re-renders
+// the content, and persists the choice to the config file.
 func (m *Model) applyTheme(name string) {
-	ansi, err := render.NewANSI(m.winW, name)
-	if err != nil {
-		return
+	if m.isMarkdown {
+		ansi, err := render.NewANSI(m.winW, name)
+		if err != nil {
+			return
+		}
+		m.ansi = ansi
+	} else {
+		src, err := render.NewSource(m.winW, name)
+		if err != nil {
+			return
+		}
+		m.source = src
 	}
-	m.ansi = ansi
 	m.theme = name
 	if err := m.renderContent(); err != nil {
 		m.err = err
@@ -60,20 +80,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.winW, m.winH = msg.Width, msg.Height
 
 		if !m.ready {
-			ansi, err := render.NewANSI(m.winW, m.theme)
-			if err != nil {
-				m.err = err
-				return m, tea.Quit
+			if m.isMarkdown {
+				ansi, err := render.NewANSI(m.winW, m.theme)
+				if err != nil {
+					m.err = err
+					return m, tea.Quit
+				}
+				m.ansi = ansi
+			} else {
+				src, err := render.NewSource(m.winW, m.theme)
+				if err != nil {
+					m.err = err
+					return m, tea.Quit
+				}
+				m.source = src
 			}
-			m.ansi = ansi
 			m.viewport = viewport.New(
 				viewport.WithWidth(m.winW),
 				viewport.WithHeight(m.winH),
 			)
 			m.settings = newSettings(render.AvailableThemes(), m.theme, m.accent(), m.muted())
 			m.ready = true
-		} else {
+		} else if m.isMarkdown {
 			_ = m.ansi.Resize(m.winW)
+		} else {
+			_ = m.source.Resize(m.winW)
 		}
 
 		if err := m.renderContent(); err != nil {

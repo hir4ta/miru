@@ -111,8 +111,14 @@ func ToHTML(filename, markdown string) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-func OpenInBrowser(filename, markdown string) error {
-	htmlBytes, err := ToHTML(filename, markdown)
+func OpenInBrowser(filename, content string) error {
+	var htmlBytes []byte
+	var err error
+	if IsMarkdown(filename) {
+		htmlBytes, err = ToHTML(filename, content)
+	} else {
+		htmlBytes, err = SourceToHTML(filename, content)
+	}
 	if err != nil {
 		return err
 	}
