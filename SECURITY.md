@@ -27,6 +27,42 @@ To report a vulnerability:
 
 If you cannot use GitHub advisories for some reason, email shunichi@hir4ta.com with the same content. Do not post details on social media or public forums before a fix is published.
 
+## Verifying releases
+
+From `v0.7.0` onward, every release artifact is signed and attested:
+
+- **`checksums.txt`** is signed with a [Sigstore](https://www.sigstore.dev/) keyless cosign signature. The certificate identity is the workflow that produced the release (`https://github.com/hir4ta/miru/.github/workflows/release.yml@refs/tags/<tag>`), and the issuer is GitHub's OIDC provider.
+- **Each tarball** carries an [SLSA build provenance](https://slsa.dev/) attestation published to the GitHub attestation store and the Sigstore transparency log.
+
+End-to-end verification (use `cosign` from <https://docs.sigstore.dev/cosign/installation/> and `gh` from <https://cli.github.com/>):
+
+```sh
+TAG=v0.7.0
+ASSET=miru_${TAG#v}_$(uname | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz
+URL=https://github.com/hir4ta/miru/releases/download/${TAG}
+
+curl -fsSL "${URL}/${ASSET}"           -o "${ASSET}"
+curl -fsSL "${URL}/checksums.txt"      -o checksums.txt
+curl -fsSL "${URL}/checksums.txt.sig"  -o checksums.txt.sig
+curl -fsSL "${URL}/checksums.txt.pem"  -o checksums.txt.pem
+
+# 1. Cosign signature on checksums.txt
+cosign verify-blob \
+  --certificate-identity-regexp "https://github.com/hir4ta/miru/.+" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate checksums.txt.pem \
+  --signature checksums.txt.sig \
+  checksums.txt
+
+# 2. Tarball SHA-256 matches checksums.txt
+shasum -a 256 -c checksums.txt --ignore-missing
+
+# 3. SLSA build provenance attestation
+gh attestation verify "${ASSET}" --repo hir4ta/miru
+```
+
+Any failure of step 1 or 3 means the artifact did not come from this repository's release pipeline — do not run it.
+
 ## Threat model summary
 
 miru's primary attack surfaces:

@@ -77,6 +77,29 @@ VERSION=v0.1.0 INSTALL_DIR=/usr/local/bin MIRU_NO_MODIFY_PATH=1 \
   curl -fsSL https://raw.githubusercontent.com/hir4ta/miru/main/install.sh | sh
 ```
 
+### Verify release artifacts
+
+From `v0.7.0` onward, every release is signed with Sigstore keyless cosign signatures and ships SLSA build provenance attestations. To verify a downloaded tarball end-to-end:
+
+```sh
+# 1. Verify the checksums.txt signature (proves the file came from this
+#    repo's release workflow).
+cosign verify-blob \
+  --certificate-identity-regexp 'https://github.com/hir4ta/miru/.+' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate checksums.txt.pem \
+  --signature checksums.txt.sig \
+  checksums.txt
+
+# 2. Verify the tarball matches checksums.txt.
+shasum -a 256 -c checksums.txt --ignore-missing
+
+# 3. Verify the SLSA build provenance attestation.
+gh attestation verify miru_<version>_<os>_<arch>.tar.gz --repo hir4ta/miru
+```
+
+See [SECURITY.md](./SECURITY.md) for the full threat model.
+
 ### Uninstall
 
 ```sh
